@@ -30,14 +30,22 @@ async function getAllPagesImpl(
   rootNotionSpaceId: string
 ): Promise<Partial<types.SiteMap>> {
   const getPage = async (pageId: string, ...args) => {
-    console.log('\nnotion getPage', uuidToId(pageId))
-    return notion.getPage(pageId, ...args)
+    console.log('\nstart notion getPage', uuidToId(pageId), args)
+    const p = await notion.getPage(pageId, ...args)
+    if (pageId in p.block) {
+      // avoiding deadly loop
+      p.block = {}
+    }
+    return p
   }
 
   const pageMap = await getAllPagesInSpace(
     rootNotionPageId,
     rootNotionSpaceId,
-    getPage
+    getPage,
+    {
+      concurrency: 10
+    }
   )
 
   const canonicalPageMap = Object.keys(pageMap).reduce(

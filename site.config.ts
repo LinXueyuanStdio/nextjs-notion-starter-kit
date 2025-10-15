@@ -10,7 +10,7 @@ export default siteConfig({
 
   // basic site info (required)
   name: 'XiChen',
-  domain: 'xichen.pub',
+  domain: 'blog.linxueyuan.online',
   author: 'XiChen',
 
   // open graph metadata (optional)

@@ -12,13 +12,16 @@ import {
 } from 'notion-utils'
 
 import * as libConfig from '@/lib/config'
-import interSemiBoldFont from '@/lib/fonts/inter-semibold'
 import { mapImageUrl } from '@/lib/map-image-url'
 import { notion } from '@/lib/notion-api'
 import { type NotionPageInfo, type PageError } from '@/lib/types'
 
-// Use nodejs runtime instead of edge to avoid 1MB size limit
-export const runtime = 'nodejs'
+export const runtime = 'edge'
+
+// Fetch font from Google Fonts at runtime to reduce bundle size
+const interFontPromise = fetch(
+  'https://fonts.gstatic.com/s/inter/v18/UcCO3FwrK3iLTeHuS_nVMrMxCp50SjIw2boKoduKmMEVuGKYAZ9hiJ-Ek-_EeA.woff2'
+).then((res) => res.arrayBuffer())
 
 export default async function OGImage(
   req: NextApiRequest,
@@ -156,7 +159,7 @@ export default async function OGImage(
       fonts: [
         {
           name: 'Inter',
-          data: interSemiBoldFont,
+          data: await interFontPromise,
           style: 'normal',
           weight: 700
         }

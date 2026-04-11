@@ -14,7 +14,7 @@ export default siteConfig({
   author: 'XiChen',
 
   // open graph metadata (optional)
-  description: 'XiChen\'s blog',
+  description: "XiChen's blog",
 
   // social usernames (optional)
   twitter: '',

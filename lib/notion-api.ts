@@ -11,13 +11,19 @@ let requestQueue = Promise.resolve()
 // Wrapper that serializes getPage calls with delay
 export const notion = {
   ...notionAPI,
-  getPage: async (pageId: string, options?: Parameters<typeof notionAPI.getPage>[1]) => {
+  getPage: async (
+    pageId: string,
+    options?: Parameters<typeof notionAPI.getPage>[1]
+  ) => {
     const result = requestQueue.then(async () => {
       const page = await notionAPI.getPage(pageId, options)
       await sleep(2000)
       return page
     })
-    requestQueue = result.then(() => {}, () => {})
+    requestQueue = result.then(
+      () => {},
+      () => {}
+    )
     return result
   },
   search: notionAPI.search.bind(notionAPI)

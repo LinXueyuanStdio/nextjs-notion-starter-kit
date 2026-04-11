@@ -30,8 +30,12 @@ const getAllPages = pMemoize(getAllPagesImpl, {
   cacheKey: (...args) => JSON.stringify(args)
 })
 
+const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms))
+
 const getPage = async (pageId: string, opts?: any) => {
   console.log('\nnotion getPage', uuidToId(pageId))
+  // Add delay between requests to avoid Notion API rate limits (429)
+  await sleep(350)
   return notion.getPage(pageId, {
     kyOptions: {
       timeout: 30_000

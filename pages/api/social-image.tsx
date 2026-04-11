@@ -17,7 +17,8 @@ import { mapImageUrl } from '@/lib/map-image-url'
 import { notion } from '@/lib/notion-api'
 import { type NotionPageInfo, type PageError } from '@/lib/types'
 
-export const runtime = 'edge'
+// Use nodejs runtime instead of edge to avoid 1MB size limit
+export const runtime = 'nodejs'
 
 export default async function OGImage(
   req: NextApiRequest,

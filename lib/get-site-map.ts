@@ -32,16 +32,25 @@ const getAllPages = pMemoize(getAllPagesImpl, {
 
 const sleep = (ms: number) => new Promise((resolve) => setTimeout(resolve, ms))
 
+// Mutex to serialize Notion API requests and avoid rate limits
+let requestQueue = Promise.resolve()
+
 const getPage = async (pageId: string, opts?: any) => {
-  console.log('\nnotion getPage', uuidToId(pageId))
-  // Add delay between requests to avoid Notion API rate limits (429)
-  await sleep(350)
-  return notion.getPage(pageId, {
-    kyOptions: {
-      timeout: 30_000
-    },
-    ...opts
+  // Serialize requests: wait for previous request to complete + delay
+  const result = requestQueue.then(async () => {
+    console.log('\nnotion getPage', uuidToId(pageId))
+    const page = await notion.getPage(pageId, {
+      kyOptions: {
+        timeout: 30_000
+      },
+      ...opts
+    })
+    // Wait 500ms after each request to avoid rate limits
+    await sleep(500)
+    return page
   })
+  requestQueue = result.then(() => {}, () => {})
+  return result
 }
 
 async function getAllPagesImpl(

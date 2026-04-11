@@ -14,7 +14,7 @@ export const notion = {
   getPage: async (pageId: string, options?: Parameters<typeof notionAPI.getPage>[1]) => {
     const result = requestQueue.then(async () => {
       const page = await notionAPI.getPage(pageId, options)
-      await sleep(500)
+      await sleep(2000)
       return page
     })
     requestQueue = result.then(() => {}, () => {})

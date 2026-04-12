@@ -80,15 +80,24 @@ async function getAllPagesImpl(
       })!
 
       if (map[canonicalPageId]) {
-        // you can have multiple pages in different collections that have the same id
-        // TODO: we may want to error if neither entry is a collection page
-        console.warn('error duplicate canonical page id', {
+        // Handle duplicate canonical page ids by using {pageId}-{canonicalPageId} format
+        const existingPageId = map[canonicalPageId]
+        console.warn('duplicate canonical page id, resolving conflict', {
           canonicalPageId,
           pageId,
-          existingPageId: map[canonicalPageId]
+          existingPageId
         })
 
-        return map
+        // Rename the existing entry to include its pageId
+        const existingShortId = uuidToId(existingPageId)
+        const newShortId = uuidToId(pageId)
+
+        delete map[canonicalPageId]
+        return {
+          ...map,
+          [`${existingShortId}-${canonicalPageId}`]: existingPageId,
+          [`${newShortId}-${canonicalPageId}`]: pageId
+        }
       } else {
         return {
           ...map,

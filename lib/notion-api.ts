@@ -19,7 +19,28 @@ const withTimeout = <T>(promise: Promise<T>, ms: number): Promise<T> => {
 
 let requestQueue = Promise.resolve()
 
-// Wrapper that serializes getPage calls with delay
+// Retry wrapper with exponential backoff
+const withRetry = async <T>(
+  fn: () => Promise<T>,
+  retries: number = 3,
+  delay: number = 5000
+): Promise<T> => {
+  for (let i = 0; i < retries; i++) {
+    try {
+      return await fn()
+    } catch (err) {
+      if (i === retries - 1) throw err
+      console.warn(
+        `Retry ${i + 1}/${retries} after error:`,
+        (err as Error).message
+      )
+      await sleep(delay * (i + 1)) // exponential backoff
+    }
+  }
+  throw new Error('Unreachable')
+}
+
+// Wrapper that serializes getPage calls with delay and retry
 export const notion = {
   ...notionAPI,
   getPage: async (
@@ -28,9 +49,10 @@ export const notion = {
   ) => {
     const result = requestQueue.then(async () => {
       try {
-        const page = await withTimeout(
-          notionAPI.getPage(pageId, options),
-          30000
+        const page = await withRetry(
+          () => withTimeout(notionAPI.getPage(pageId, options), 30000),
+          3,
+          5000
         )
         await sleep(2000)
         return page

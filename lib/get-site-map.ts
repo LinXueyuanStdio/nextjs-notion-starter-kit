@@ -33,12 +33,22 @@ const getAllPages = pMemoize(getAllPagesImpl, {
 const getPage = async (pageId: string, opts?: any) => {
   console.log('\nnotion getPage', uuidToId(pageId))
   // Rate limiting is handled in notion-api.ts
-  return notion.getPage(pageId, {
-    kyOptions: {
-      timeout: 30_000
-    },
-    ...opts
-  })
+  try {
+    return await notion.getPage(pageId, {
+      kyOptions: {
+        timeout: 30_000
+      },
+      ...opts
+    })
+  } catch (err: any) {
+    console.error(`Failed to load page ${uuidToId(pageId)}:`, {
+      message: err?.message,
+      status: err?.status,
+      code: err?.code,
+      stack: err?.stack
+    })
+    throw err
+  }
 }
 
 async function getAllPagesImpl(
